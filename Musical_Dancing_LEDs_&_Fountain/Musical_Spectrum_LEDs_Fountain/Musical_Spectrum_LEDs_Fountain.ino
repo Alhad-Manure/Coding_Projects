@@ -1,3 +1,8 @@
+/******************************
+Alhad Manure
+Date: 09/09/2021
+******************************/
+
 #include "FastLED.h"
 #include "reactive_common.h"
 FASTLED_USING_NAMESPACE
