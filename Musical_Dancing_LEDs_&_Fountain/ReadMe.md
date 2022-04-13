@@ -1,2 +1,0 @@
-
-Musical Dancing LEDs & Fountain
