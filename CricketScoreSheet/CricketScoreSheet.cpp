@@ -196,7 +196,7 @@ ScoreSheet::ScoreSheet()
 	m_out=0;
 	m_ballCount=0;
 	m_maxOut=m_team1.init();                            // Initialize Team
-	cout<<"\nEnter no of Overs in one Innings: ";
+	cout<<"\nEnter no. of Overs in one Innings: ";
 	cin>>m_maxOver;
 	cout<<"\n\nChoose opening Batsman:";
 	
@@ -222,9 +222,7 @@ ScoreSheet::ScoreSheet()
 
 /******* Showing Entire Score *********/
 void ScoreSheet::show(void)
-{
-	
-	
+{	
 	cout<<"//////////////////////////////////////////////////"<<endl;
 	cout<<"                   "<<m_team1.getTeamName()<<" Score                     "<<endl;
 	cout<<"//////////////////////////////////////////////////"<<endl<<endl;
@@ -232,20 +230,43 @@ void ScoreSheet::show(void)
 	for(int i=0;i<=m_maxOut;i++)
     {
 		std::string playerName = m_team1.getName(i);
-		std::string dspName = playerName;
-		dspName += ((m_over < m_maxOver) && (m_out < m_maxOut) && (m_player1==playerName)) ? "*                         " : "                          ";
-    	cout << dspName;
-    	cout<<showStatus(m_team1.getStatus(playerName))<<"                    ";   	
-    	
-		if(m_team1.getStatus(playerName))
+		if(m_team1.getStatus(playerName)!=0)
 		{
+			std::string dspName = playerName;
+			dspName += ((m_over < m_maxOver) && (m_out < m_maxOut) && (m_player1==playerName)) ? "*" : "";
+			cout << dspName;
+			for(int i=0; i<(32-dspName.size()); i++)
+			{
+				cout<<" ";
+			}
+			std::string status = showStatus(m_team1.getStatus(playerName));
+			cout<<status; 
+			for(int i=0; i<(27-status.size()); i++)
+			{
+				cout<<" ";
+			}  				
 			cout<<m_team1.getRun(playerName);
 			cout<<"("<<m_team1.getBall(playerName)<<")";
-		}
-		
-    	cout<<endl;
+			cout<<endl;
+		}		
    	}
    	
+	for(int i=0;i<=m_maxOut;i++)
+    {
+		std::string playerName = m_team1.getName(i);
+		if(m_team1.getStatus(playerName)==0)
+		{
+			cout << playerName;
+			for(int i=0; i<(32-playerName.size()); i++)
+			{
+				cout<<" ";
+			}
+			cout<<showStatus(m_team1.getStatus(playerName));
+			cout<<endl;  	
+		}		
+    	
+   	}
+
 	cout<<"\nExtra"; 
 	cout<<"\t"<<m_team1.getExtra()<<endl<<endl;
 	cout<<"--------------------------------------------------"<<endl;
@@ -262,8 +283,8 @@ void ScoreSheet::show(void)
 void ScoreSheet::chooseOption()
 {
 	cout<<"\nChoose option:\n";                //Options for
-  	cout<<"\n\t 1. Dot Ball";                   //Updating
- 	cout<<"\n\t 2. Add Run";                    //Score Card
+  	cout<<"\n\t 1. Dot Ball";                  //Updating
+ 	cout<<"\n\t 2. Add Run";                   //Score Card
  	cout<<"\n\t 3. Extra";
   	cout<<"\n\t 4. Wicket";
   	cout<<"\n\t10. Exit\n";
@@ -318,7 +339,7 @@ void ScoreSheet::isEndChanged()
 	std::string endChanged;
 	cin>>endChanged;
 
-	while(endChanged !="y" || endChanged !="n")
+	while(endChanged !="y" && endChanged !="n")
 	{
 		cout<<"Please enter 'y' or 'n': ";
 		cin>>endChanged;
@@ -332,21 +353,6 @@ void ScoreSheet::isEndChanged()
 	}
 } 
 
-/****** Add Extra Run ********/
-void ScoreSheet::extraRun(void)
-{
-	cout<<"\n\n************\n";
-	cout<<"             Extra Run              \n";
-	cout<<"************\n\n";
-	cout<<"Extra?";
-	cin>>extra;
-
-	isEndChanged();
-
-	m_team1.setExtra(extra);
-	show();
-}
-
 /****** Add Current Player Run********/
 void ScoreSheet::addRun(void)
 {
@@ -357,7 +363,7 @@ void ScoreSheet::addRun(void)
 	cin>>runs;
 	m_team1.addRun(m_player1,runs);
 	
-	if(runs==1||runs==3)
+	if(runs==1||runs==3 || runs==5)
 	{
 	    std::string temp = m_player1;
 	    m_player1=m_player2;
@@ -370,6 +376,59 @@ void ScoreSheet::addRun(void)
 		return;
 	}
 	
+	show();
+}
+
+/****** Add Extra Run ********/
+void ScoreSheet::extraRun(void)
+{
+	cout<<"\n\n************\n";
+	cout<<"             Extra Run              \n";
+	cout<<"************\n\n";
+	cout<<"Extra Type?"<<std::endl;
+	cout<<"1. Wide"<<std::endl;
+	cout<<"2. No Ball"<<std::endl;
+	cout<<"3. Leg Byes"<<std::endl;
+	cout<<"4. Byes"<<std::endl;
+	cout<<"5. No Ball & Leg Byes"<<std::endl;
+	cout<<"6. No Ball & Byes"<<std::endl;
+	cin>>extra;
+	
+	if(extra == 1)
+	{
+		cout<<"Runs? "<<std::endl;
+		int runs;
+		cin>>runs;
+		m_team1.setExtra(runs);
+		isEndChanged();
+	}
+	else if(extra == 3 || extra == 4)
+	{
+		m_ballCount++;
+	    m_team1.setBall(m_player1);
+		cout<<"Runs? "<<std::endl;
+		int runs;
+		cin>>runs;
+		m_team1.setExtra(runs);
+		isEndChanged();
+	}
+	else if(extra == 2)
+	{
+		cout<<"Only put runs scored by player";
+		addRun();
+		m_ballCount--; // removing extra ball counted in addRun as legal delivery
+		m_team1.setExtra(1);
+	}
+	else if(extra == 5 || extra == 6)
+	{
+		m_team1.setBall(m_player1);
+		cout<<"Runs? "<<std::endl;
+		int runs;
+		cin>>runs;
+		m_team1.setExtra(runs);
+		isEndChanged();
+	}
+
 	show();
 }
 
@@ -482,6 +541,10 @@ void ScoreSheet::wicket(void)
 
 int main(void)
 {
+	cout<<"///////////////////////////////////////////////////////////////////////"<<endl;
+	cout<<"                        Cricket Score Sheet App\n";
+	cout<<"           Tested by Best Straight Drive Shot Player of VSCA\n";
+	cout<<"///////////////////////////////////////////////////////////////////////"<<endl;
 	ScoreSheet score;
 	score.show();
 }
