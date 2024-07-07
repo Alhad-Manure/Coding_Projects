@@ -3,7 +3,7 @@ import json
 import pymongo
 from bson.objectid import ObjectId
 
-# keeping this parameters predefined as of now THese can be sent as part of url
+# keeping these parameters predefined as of now THese can be sent as part of url
 # When this aplication is further customised
 uri = 'mongodb+srv://AlhadManure:AlhadManureMongo@cluster0.ckyvhwy.mongodb.net/'       
 dbToUse = "Alhad_Manure"
@@ -29,8 +29,7 @@ class databaseHandler:
             self.client = pymongo.MongoClient(self.url)
             print("server_info():", self.client.server_info())
         except Exception as e:   
-            print("Could not connect to MongoDB")
-            print(e)
+            print("Could not connect to MongoDB", e)
         
         try:    
             self.db = self.client[self.dbName]
@@ -48,8 +47,7 @@ class databaseHandler:
             else:
                 self.collection.insert_one(ipJson)
         except Exception as e:   
-            print("Failed to insertJsonObjectToDb")
-            print(e)
+            print("Failed to insertJsonObjectToDb", e)
     
     # Method to get all data from database
     def getAllDataFromThisDbCollection(self):
@@ -60,8 +58,7 @@ class databaseHandler:
                 print(res)
             return result
         except Exception as e:   
-            print("Failed to getAllDataFromThisDbCollection")
-            print(e)
+            print("Failed to getAllDataFromThisDbCollection", e)
     
     # Method to get json object of given ID from database
     def getObjectWithGivenId(self, id):
@@ -70,29 +67,18 @@ class databaseHandler:
             # Exluding _id field while retreiving the data
             filter = {"_id": 0}
             result = self.collection.find_one(query, filter)
-            print('The queried object:')
-            print(result)
             return result
         except Exception as e:   
-            print("Failed to getObjectWithGivenId")
-            print(e)
+            print("Failed to getObjectWithGivenId", e)
 
-    # Method to get json object containing given key and value from database
-    def getObjectWithGivenCriteria(self, objectCriteria, criteriaValue):
-        try:
-            query = {objectCriteria: criteriaValue}
-            result = self.collection.find_one(query)
-            print('The queried Criteria object:')
-            print(result)
-            return result
-        except Exception as e:   
-            print("Failed to getObjectWithGivenCriteria")
-            print(e)
-    
     # Method to update json object of given ID from database
     def updateTheJsonObjOfId(self, id, dataToUpdate):
         try:
             totCount = 0
+
+            if(not ObjectId.is_valid(id)):     
+                   return 0
+            
             for key in dataToUpdate:
                 result = self.collection.update_many( 
                     {"_id": ObjectId(id)}, 
@@ -108,56 +94,34 @@ class databaseHandler:
             return totCount
 
         except Exception as e:   
-            print("Failed to updateTheJsonObj")
-            print(e)
+            print("Failed to updateTheJsonObj", e)
+            return jsonify({"error": "Data not found"}), 404
 
-    # Method to update json object containing given key and value from database
-    def updateTheJsonObj(self, objectCriteria, criteriaValue, fieldToUpdate, value):
-        try:
-            result = self.collection.update_many( 
-                {objectCriteria:criteriaValue}, 
-                    { 
-                        "$set":{ 
-                            fieldToUpdate:value
-                            }, 
-                        "$currentDate":{"lastModified":True}                   
-                    } 
-                )
-            return result.count()
-        except Exception as e:   
-            print("Failed to updateTheJsonObj")
-            print(e)
-    
     # Method to delete json object of given ID from database
     def deleteTheJsonObjOfId(self, id):
         try:
+            if(not ObjectId.is_valid(id)):     
+                   return 0
+
             result = self.collection.delete_many({"_id": ObjectId(id)})
             return result.deleted_count
 
         except Exception as e:   
-           print("Failed to deleteTheJsonObj")
-           print(e)
-
-    # Method to delete json object containing given key and value from database
-    def deleteTheJsonObj(self, objectCriteria, criteriaValue):
-        try:
-            result = self.collection.delete_many({objectCriteria: criteriaValue})
-        except Exception as e:   
-           print("Failed to deleteTheJsonObj")
-           print(e)
+           print("Failed to deleteTheJsonObj", e)
 
     # Method to close the connection with db
     def closeDbConnection(self):
         try:
             self.client.close()
         except Exception as e:   
-           print("Failed to closeDbConnection")
-           print(e)
+           print("Failed to closeDbConnection", e)
 
+###### Flask Application ######
 # Creating Flask application
 app = Flask(__name__)
 
 # POST request handling
+# Throws "400 Bad Request" if Invalid json is passed
 @app.route('/data', methods=['POST'])
 def store_data():
     if request.is_json:
@@ -170,10 +134,11 @@ def store_data():
     else:
         return jsonify({"error": "Request must be JSON"}), 400 
 
+
 # GET request handling
+# Throws "404 Data not found" if Invalid ID is passed.
 @app.route('/data/<ipId>', methods=['GET'])
 def get_data(ipId):
-    print("Retrieving:")
     mongodbObj = databaseHandler(url = uri, dbName=dbToUse, collectionName= collectionToUse)
     res = mongodbObj.getObjectWithGivenId(id = ipId )
     
@@ -182,10 +147,11 @@ def get_data(ipId):
     else:
         return jsonify({"error": "Data not found"}), 404
 
+
 # PUT request handling
+# Throws "404 Data not found" if Invalid ID is passed.
 @app.route('/data/<ipId>', methods=['PUT'])
 def update_data(ipId):
-    print("Updating:")
 
     if request.is_json:
         data = request.get_json()
@@ -203,6 +169,7 @@ def update_data(ipId):
 
 
 # DELETE request handling
+# Throws "404 Data not found" if Invalid ID is passed.
 @app.route('/data/<ipId>', methods=['DELETE'])
 def delete_data(ipId):
 
