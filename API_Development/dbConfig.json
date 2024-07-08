@@ -1,0 +1,9 @@
+{
+    "dbCred" : [
+        {
+            "url": "mongodb+srv://AlhadManure:AlhadManureMongo@cluster0.ckyvhwy.mongodb.net/",
+            "dbName": "AlhadDb",
+            "collectionName": "data"
+        }
+    ]
+}

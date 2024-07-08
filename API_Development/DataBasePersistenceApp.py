@@ -3,25 +3,47 @@ import json
 import pymongo
 from bson.objectid import ObjectId
 
+'''
 # keeping these parameters predefined as of now THese can be sent as part of url
 # When this aplication is further customised
 uri = 'mongodb+srv://AlhadManure:AlhadManureMongo@cluster0.ckyvhwy.mongodb.net/'       
 dbToUse = "Alhad_Manure"
 collectionToUse = "data"
+'''
 
 # This class will take care of database handalling
 # To-Do make it as singleton
 class databaseHandler:
     
-    def __init__(self, url, dbName, collectionName):
-        self.url = url
-        self.dbName = dbName
-        self.collectionName = collectionName
+    def __init__(self):
+        self.getCredentials()
         self.makeConnection()
 
     def __del__(self):
         # Make sure that db connection is closed at end of scope or when object is destroyed.
         self.closeDbConnection()
+
+    # Method to read db credentials from config file
+    def getCredentials(self):
+        try:
+            # Opening JSON file
+            f = open('dbConfig.json')
+            
+            # returns JSON object as 
+            # a dictionary
+            data = json.load(f)
+            
+            # Iterating through the json
+            # list
+            for d in data['dbCred']:
+                self.url = d["url"]
+                self.dbName = d["dbName"]
+                self.collectionName = d["collectionName"]
+            
+            # Closing file
+            f.close()
+        except Exception as e:   
+            print("Failed to parse dbConfig.json", e)
 
     # Method to set connection with our database
     def makeConnection(self):
@@ -127,7 +149,7 @@ def store_data():
     if request.is_json:
         data = request.get_json()
         
-        mongodbObj = databaseHandler(url = uri, dbName=dbToUse, collectionName= collectionToUse)
+        mongodbObj = databaseHandler()
         mongodbObj.insertJsonObjectToDb(data)
         
         return jsonify({"message": "Data stored successfully"}), 201
@@ -139,7 +161,7 @@ def store_data():
 # Throws "404 Data not found" if Invalid ID is passed.
 @app.route('/data/<ipId>', methods=['GET'])
 def get_data(ipId):
-    mongodbObj = databaseHandler(url = uri, dbName=dbToUse, collectionName= collectionToUse)
+    mongodbObj = databaseHandler()
     res = mongodbObj.getObjectWithGivenId(id = ipId )
     
     if res:
@@ -156,7 +178,7 @@ def update_data(ipId):
     if request.is_json:
         data = request.get_json()
 
-        mongodbObj = databaseHandler(url = uri, dbName=dbToUse, collectionName= collectionToUse)
+        mongodbObj = databaseHandler()
         json_str = str(data)
         res = mongodbObj.updateTheJsonObjOfId( id=ipId, dataToUpdate=data)
         
@@ -173,7 +195,7 @@ def update_data(ipId):
 @app.route('/data/<ipId>', methods=['DELETE'])
 def delete_data(ipId):
 
-    mongodbObj = databaseHandler(url = uri, dbName=dbToUse, collectionName= collectionToUse)
+    mongodbObj = databaseHandler()
     result = mongodbObj.deleteTheJsonObjOfId( id=ipId )    
 
     if result > 0:

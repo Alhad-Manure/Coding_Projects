@@ -9,12 +9,10 @@ class FlaskTestCase(unittest.TestCase):
         self.app = app.test_client()
         self.app.testing = True
 
-        # Initialize the database
-        self.uri = 'mongodb+srv://AlhadManure:AlhadManureMongo@cluster0.ckyvhwy.mongodb.net/'       
-        self.dbToUse = "Alhad_Manure"
-        self.collectionToUse = "data"
-
-        self.dbObj = databaseHandler(url = self.uri, dbName=self.dbToUse, collectionName = self.collectionToUse)
+        self.dbObj = databaseHandler()
+        # First, store data to ensure there is something in db
+        ipJson = [{"key1":"value1"}, {"key2":"value2"}, {"key3":"value3"}, {"key4":"value4"}]
+        self.dbObj.insertJsonObjectToDb(ipJson)
 
     def getIds(self):
         # Get all data from db
@@ -32,40 +30,31 @@ class FlaskTestCase(unittest.TestCase):
 
     def test_store_data(self):
         # Test storing JSON data.
-        response = self.app.post('/data', data=json.dumps({'key': 'value'}), content_type='application/json')
+        response = self.app.post('/data', data=json.dumps({'key5': 'value5'}), content_type='application/json')
+
         self.assertEqual(response.status_code, 201)
         self.assertIn(b'Data stored successfully', response.data)
 
     def test_get_data(self):
         # Test retrieving JSON data.
-        # First, store data to ensure there is something to get
-        self.app.post('/data', data=json.dumps({'keyGet1': 'valueGet1'}), content_type='application/json')
-        self.app.post('/data', data=json.dumps({'keyGet2': 'valueGet2'}), content_type='application/json')
-        
         # Get ObjectIds from our db
         ids = self.getIds()
              
         response = self.app.get('/data/' + ids[0])
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'{"keyGet1":"valueGet1"}', response.data)
+        self.assertIn(b'{"key1":"value1"}', response.data)
           
     def test_update_data(self):
-        # Test updating JSON data.
-        # First, store data to ensure there is something to update
-        self.app.post('/data', data=json.dumps({'key': 'value'}), content_type='application/json')
-        
+        # Test updating JSON data.      
         # Get ObjectIds from our db
         ids = self.getIds()
 
-        response = self.app.put('/data/' + ids[1], data=json.dumps({'key': 'new_value'}), content_type='application/json')
+        response = self.app.put('/data/' + ids[1], data=json.dumps({'key3Up': 'new_value3Up'}), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Data updated successfully', response.data)
 
     def test_delete_data(self):
-        # Test deleting JSON data.
-        # First, store data to ensure there is something to delete
-        self.app.post('/data', data=json.dumps({'key': 'value'}), content_type='application/json')
-        
+        # Test deleting JSON data.    
         # Get ObjectIds from our db
         ids = self.getIds()
 
