@@ -9,7 +9,7 @@ class FlaskTestCase(unittest.TestCase):
         self.app = app.test_client()
         self.app.testing = True
 
-        self.dbObj = databaseHandler()
+        self.dbObj = databaseHandler.databaseHandler()
         # First, store data to ensure there is something in db
         ipJson = [{"key1":"value1"}, {"key2":"value2"}, {"key3":"value3"}, {"key4":"value4"}]
         self.dbObj.insertJsonObjectToDb(ipJson)
