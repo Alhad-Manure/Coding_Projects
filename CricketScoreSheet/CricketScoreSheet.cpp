@@ -5,7 +5,7 @@
 #include <map>
 #include <math.h>
 #include <stdio.h>
-//#include <bits/stdc++.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -549,3 +549,4 @@ int main(void)
 	score.show();
 
 }
+
