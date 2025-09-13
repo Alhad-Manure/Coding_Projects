@@ -17,7 +17,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Compile with MSVC (cl.exe)
-        run: cl /EHsc CricketScoreSheet.cpp /Fe:CricketScoreSheet.exe
+        run: cl /EHsc CricketScoreSheet/CricketScoreSheet.cpp /Fe:CricketScoreSheet.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
