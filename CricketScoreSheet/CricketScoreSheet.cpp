@@ -543,10 +543,11 @@ int main(void)
 {
 	cout<<"///////////////////////////////////////////////////////////////////////"<<endl;
 	cout<<"                        Cricket Score Sheet App\n";
-	cout<<"           Tested by Best Straight Drive Shot Player of VSCA\n";
+	cout<<"           ####################################################\n";
 	cout<<"///////////////////////////////////////////////////////////////////////"<<endl;
 	ScoreSheet score;
 	score.show();
 
 }
+
 
