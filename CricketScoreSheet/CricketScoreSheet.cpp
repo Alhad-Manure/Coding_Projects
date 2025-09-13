@@ -5,7 +5,7 @@
 #include <map>
 #include <math.h>
 #include <stdio.h>
-#include <bits/stdc++.h>
+//#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -547,4 +547,5 @@ int main(void)
 	cout<<"///////////////////////////////////////////////////////////////////////"<<endl;
 	ScoreSheet score;
 	score.show();
+
 }
